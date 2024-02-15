@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String  @id @default(uuid())
+  name          String
+  personalEmail String  @unique
+  kiitEmail     String  @unique
+  phoneNumber   String?
+  password      String
+  githubUrl     String
+  linkedinUrl   String
+  portfolioUrl  String?
+  currentYear   Int
+  branch        String
+  isMember      Boolean @default(false)
+  member        Member?
+
+  registeredEvents Event[] @relation("UserRegisteredEvents")
+}
+
+model Member {
+  id       String @id @default(uuid())
+  userId   String @unique
+  imageUrl String
+
+  hostedEvents Event[]  @relation("EventHosted")
+  position     POSITION @default(MEMBER)
+  role         ROLE
+  user         User    @relation(fields: [userId], references: [id])
+}
+
+model Event {
+  id                String    @id @default(uuid())
+  name              String
+  imageUrl          String
+  description       String
+  startDate         DateTime
+  registerStartDate DateTime
+  registerEndDate   DateTime
+  venue             String
+  hosts             Member[]  @relation("EventHosted")
+  sponsors          Sponsor[]
+  registeredUsers   User[]    @relation("UserRegisteredEvents")
+}
+
+model Sponsor {
+  id          String @id @default(uuid())
+  name        String
+  logoUrl     String
+  description String
+  link        String
+
+  Event Event[]
+}
+
+model ContactUs {
+  id             String   @id @default(uuid())
+  name           String
+  email          String
+  message        String
+  issue_resolved Boolean? @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Blog {
+  id          String @id @default(uuid())
+  title       String
+  author      String
+  description String
+  imageUrl    String
+  link        String
+  date        String
+}
+
+enum POSITION {
+  // For Internal Members
+  LEAD //  Anvit Dubey
+  VICE_LEAD //  Saniya Bhargav
+  TECH_LEAD // Prashant Upadhyay, Atig Purohit, Akshita Sah
+  EXECUTIVE //  Swastika Bishnoi
+  CREATIVE_LEAD //  Mayank Jain
+  CONTENT_LEAD //  Aradhya Kumar
+  MARKETING_LEAD //  Ayush Raj
+  PR_CR_LEAD //  Rishab Barik // Public Relations and Corporate Relations
+  ALUMNI //  Past Members
+  MEMBER //  All others
+}
+
+enum ROLE {
+  // Tech Team
+  BACKEND
+  FRONTEND
+  AI_ML
+  APP
+  AR_VR
+  CLOUD
+  CYBER_SECURITY
+
+  // Creative Team
+  CONTENT
+  YOUTUBE
+  DESIGNER
+  VIDEO_EDITOR
+  UI_UX
+
+  // Marketing Team
+  PR_CR
+}
